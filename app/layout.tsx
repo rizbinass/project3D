@@ -27,8 +27,29 @@ export const metadata: Metadata = {
   },
   description: SEO_DEFAULTS.description,
   applicationName: siteConfig.name,
+  keywords: [
+    "interactive portfolio",
+    "3D portfolio",
+    "front-end engineer",
+    "Three.js developer",
+    "React developer",
+    "creative developer",
+  ],
   authors: [{ name: siteConfig.creator }],
   creator: siteConfig.creator,
+  publisher: siteConfig.creator,
+  category: "portfolio",
+  alternates: {
+    canonical: siteConfig.url,
+  },
+  appleWebApp: {
+    capable: true,
+    title: siteConfig.name,
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     type: "website",
     locale: siteConfig.locale,
@@ -54,6 +75,13 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
   },
   icons: {
     icon: "/icon.png",

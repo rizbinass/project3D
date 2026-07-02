@@ -91,6 +91,7 @@ interface InteractiveGroupProps {
 
 function InteractiveGroup({ id, children }: InteractiveGroupProps) {
   const groupRef = useRef<Group>(null);
+  const scaleRef = useRef(new Vector3(1, 1, 1));
   const hoveredObjectId = useInteractionStore((state) => state.hoveredObjectId);
   const { focusObject, setHoveredObjectId, clearHover } = useRoomObjectInteraction();
   const hovered = hoveredObjectId === id;
@@ -101,10 +102,8 @@ function InteractiveGroup({ id, children }: InteractiveGroupProps) {
     }
 
     const targetScale = hovered ? 1.045 : 1;
-    groupRef.current.scale.lerp(
-      new Vector3(targetScale, targetScale, targetScale),
-      1 - Math.exp(-delta * 12),
-    );
+    scaleRef.current.set(targetScale, targetScale, targetScale);
+    groupRef.current.scale.lerp(scaleRef.current, 1 - Math.exp(-delta * 12));
   });
 
   return (

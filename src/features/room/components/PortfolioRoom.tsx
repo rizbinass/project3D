@@ -1,10 +1,23 @@
 "use client";
 
+import dynamic from "next/dynamic";
+import { ClientErrorBoundary } from "@/components/layout/ClientErrorBoundary";
+import { LoadingScreen } from "@/components/ui/LoadingScreen";
 import { RoomBootOverlay } from "./RoomBootOverlay";
-import { RoomCanvas } from "./RoomCanvas";
-import { PortfolioOverlay } from "./PortfolioOverlay";
 import { useRoomBoot } from "@/features/room/hooks/useRoomBoot";
 import { useSceneQuality } from "@/features/room/hooks/useSceneQuality";
+
+const RoomCanvas = dynamic(() => import("./RoomCanvas").then((module) => module.RoomCanvas), {
+  ssr: false,
+  loading: () => <LoadingScreen label="Preparing 3D workspace" />,
+});
+
+const PortfolioOverlay = dynamic(
+  () => import("./PortfolioOverlay").then((module) => module.PortfolioOverlay),
+  {
+    ssr: false,
+  },
+);
 
 export function PortfolioRoom() {
   useSceneQuality();
@@ -12,9 +25,13 @@ export function PortfolioRoom() {
 
   return (
     <main className="bg-background text-text-primary relative h-dvh w-full overflow-hidden">
-      <RoomCanvas />
+      <ClientErrorBoundary label="3D workspace" className="z-overlay absolute inset-6">
+        <RoomCanvas />
+      </ClientErrorBoundary>
       <RoomBootOverlay visible={!ready} />
-      <PortfolioOverlay />
+      <ClientErrorBoundary label="Portfolio panel" resetKey={ready ? "ready" : "booting"}>
+        <PortfolioOverlay />
+      </ClientErrorBoundary>
     </main>
   );
 }

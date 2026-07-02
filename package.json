@@ -20,7 +20,9 @@
     "assets:manifest": "node scripts/generate-manifest.mjs",
     "assets:models": "node scripts/optimize-models.mjs",
     "assets:textures": "node scripts/compress-textures.mjs",
+    "assets:optimize": "pnpm assets:textures && pnpm assets:models && pnpm assets:manifest",
     "analyze:bundle": "node scripts/analyze-bundle.mjs",
+    "audit:lighthouse": "lhci autorun",
     "prepare": "husky"
   },
   "dependencies": {
@@ -46,6 +48,8 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
+    "@gltf-transform/cli": "^4.4.1",
+    "@lhci/cli": "^0.15.1",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.10.7",
     "@types/react": "^19.0.7",
@@ -58,6 +62,7 @@
     "postcss": "^8.5.1",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.10",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.3"
   },

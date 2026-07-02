@@ -8,12 +8,13 @@ export function RoomLighting() {
   const qualityLevel = useSceneStore((state) => state.qualityLevel);
   const preset = sceneStatus === "booting" ? lightingPresets.entry : lightingPresets.idle;
   const shadowMapSize = qualityLevel === "ultra" ? 2048 : qualityLevel === "high" ? 1024 : 512;
+  const shadowsEnabled = qualityLevel === "high" || qualityLevel === "ultra";
 
   return (
     <group>
       <ambientLight intensity={preset.ambient} color="#b6d7ff" />
       <directionalLight
-        castShadow
+        castShadow={shadowsEnabled}
         color="#d8ecff"
         intensity={preset.key}
         position={[-3.5, 5.4, 4.4]}
