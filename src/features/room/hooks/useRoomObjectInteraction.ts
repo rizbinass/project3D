@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import type { InteractiveObjectId } from "@/core/types/scene.types";
 import { interactiveObjects } from "@/features/room/data/interactive-objects.data";
 import { useInteractionStore } from "@/store/useInteractionStore";
@@ -8,6 +8,7 @@ import { useOverlayStore } from "@/store/useOverlayStore";
 import { useSceneStore } from "@/store/useSceneStore";
 
 export const useRoomObjectInteraction = () => {
+  const openDelayRef = useRef<number | null>(null);
   const openOverlay = useOverlayStore((state) => state.openOverlay);
   const setCameraPresetId = useSceneStore((state) => state.setCameraPresetId);
   const setFocusedObjectId = useSceneStore((state) => state.setFocusedObjectId);
@@ -18,12 +19,26 @@ export const useRoomObjectInteraction = () => {
       const object = interactiveObjects[objectId];
       setFocusedObjectId(objectId);
       setCameraPresetId(object.cameraPresetId);
-      window.setTimeout(() => openOverlay(object.overlayId), 420);
+
+      if (openDelayRef.current) {
+        window.clearTimeout(openDelayRef.current);
+      }
+
+      openDelayRef.current = window.setTimeout(() => openOverlay(object.overlayId), 420);
     },
     [openOverlay, setCameraPresetId, setFocusedObjectId],
   );
 
   const clearHover = useCallback(() => setHoveredObjectId(null), [setHoveredObjectId]);
+
+  useEffect(
+    () => () => {
+      if (openDelayRef.current) {
+        window.clearTimeout(openDelayRef.current);
+      }
+    },
+    [],
+  );
 
   return {
     focusObject,

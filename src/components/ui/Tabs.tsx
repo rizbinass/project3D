@@ -1,7 +1,7 @@
 "use client";
 
 import type { KeyboardEvent, ReactNode } from "react";
-import { useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 
 export interface TabItem {
@@ -17,8 +17,9 @@ export interface TabsProps {
 }
 
 export function Tabs({ tabs, defaultTabId, className }: TabsProps) {
+  const id = useId();
   const [activeTabId, setActiveTabId] = useState(defaultTabId ?? tabs[0]?.id);
-  const activeTab = tabs.find((tab) => tab.id === activeTabId);
+  const activeTab = useMemo(() => tabs.find((tab) => tab.id === activeTabId), [activeTabId, tabs]);
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>, index: number): void => {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
       return;
@@ -35,6 +36,9 @@ export function Tabs({ tabs, defaultTabId, className }: TabsProps) {
             : (index - 1 + tabs.length) % tabs.length;
 
     setActiveTabId(tabs[nextIndex]?.id);
+    requestAnimationFrame(() => {
+      document.getElementById(`${id}-tab-${tabs[nextIndex]?.id}`)?.focus();
+    });
   };
 
   return (
@@ -43,11 +47,11 @@ export function Tabs({ tabs, defaultTabId, className }: TabsProps) {
         {tabs.map((tab, index) => (
           <button
             key={tab.id}
-            id={`tab-${tab.id}`}
+            id={`${id}-tab-${tab.id}`}
             type="button"
             role="tab"
             aria-selected={tab.id === activeTabId}
-            aria-controls={`tabpanel-${tab.id}`}
+            aria-controls={`${id}-tabpanel-${tab.id}`}
             tabIndex={tab.id === activeTabId ? 0 : -1}
             className={cn(
               "text-text-secondary h-9 rounded-md px-4 text-sm transition",
@@ -62,9 +66,9 @@ export function Tabs({ tabs, defaultTabId, className }: TabsProps) {
       </div>
       {activeTab && (
         <div
-          id={`tabpanel-${activeTab.id}`}
+          id={`${id}-tabpanel-${activeTab.id}`}
           role="tabpanel"
-          aria-labelledby={`tab-${activeTab.id}`}
+          aria-labelledby={`${id}-tab-${activeTab.id}`}
           className="mt-6"
         >
           {activeTab.content}

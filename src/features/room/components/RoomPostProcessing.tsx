@@ -18,7 +18,7 @@ export function RoomPostProcessing() {
   const qualityLevel = useSceneStore((state) => state.qualityLevel);
   const qualityProfile = qualityProfiles[qualityLevel];
   const chromaticOffset = useMemo(() => new Vector2(0.00045, 0.00025), []);
-  const premiumEffectsEnabled = qualityLevel === "high" || qualityLevel === "ultra";
+  const cinematicEffectsEnabled = qualityLevel === "ultra";
 
   if (!qualityProfile.postprocessing) {
     return null;
@@ -27,22 +27,22 @@ export function RoomPostProcessing() {
   return (
     <EffectComposer
       multisampling={qualityLevel === "ultra" ? 2 : 0}
-      enableNormalPass={premiumEffectsEnabled}
+      enableNormalPass={cinematicEffectsEnabled}
     >
       <Bloom
-        intensity={qualityLevel === "medium" ? 0.22 : 0.32}
+        intensity={qualityLevel === "ultra" ? 0.32 : 0.24}
         luminanceThreshold={0.42}
         luminanceSmoothing={0.82}
         mipmapBlur
       />
-      {premiumEffectsEnabled ? (
+      {cinematicEffectsEnabled ? (
         <DepthOfField focusDistance={0.032} focalLength={0.025} bokehScale={1.45} />
       ) : (
         <></>
       )}
       <BrightnessContrast brightness={0.015} contrast={0.055} />
       <HueSaturation saturation={0.035} />
-      {premiumEffectsEnabled ? (
+      {cinematicEffectsEnabled ? (
         <ChromaticAberration offset={chromaticOffset} radialModulation modulationOffset={0.15} />
       ) : (
         <></>

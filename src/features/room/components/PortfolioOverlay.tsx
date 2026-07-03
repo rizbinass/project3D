@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, Copy, Code2, Download, ExternalLink, ImageIcon, Mail, Play, X } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -59,15 +59,18 @@ function useClosePortfolioOverlay() {
 }
 
 function ProjectsSection() {
-  const categories = [
-    "All",
-    ...Array.from(new Set(projectsContent.map((project) => project.category))),
-  ];
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set(projectsContent.map((project) => project.category)))],
+    [],
+  );
   const [category, setCategory] = useState("All");
-  const projects =
-    category === "All"
-      ? projectsContent
-      : projectsContent.filter((project) => project.category === category);
+  const projects = useMemo(
+    () =>
+      category === "All"
+        ? projectsContent
+        : projectsContent.filter((project) => project.category === category),
+    [category],
+  );
 
   return (
     <div className="grid gap-6">
@@ -136,9 +139,9 @@ function ProjectsSection() {
 }
 
 function SkillsSection() {
-  return (
-    <Tabs
-      tabs={skillsContent.map((group) => ({
+  const tabs = useMemo(
+    () =>
+      skillsContent.map((group) => ({
         id: group.category,
         label: group.category,
         content: (
@@ -154,9 +157,11 @@ function SkillsSection() {
             ))}
           </div>
         ),
-      }))}
-    />
+      })),
+    [],
   );
+
+  return <Tabs tabs={tabs} />;
 }
 
 function AboutSection() {
@@ -324,16 +329,33 @@ function ResumeSection() {
 
 function ContactSection() {
   const [copied, setCopied] = useState(false);
+  const copiedTimeoutRef = useRef<number | null>(null);
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: { name: "", email: "", message: "" },
   });
 
   const copyEmail = async (): Promise<void> => {
+    if (!navigator.clipboard) {
+      return;
+    }
+
     await navigator.clipboard.writeText("hello@example.com");
     setCopied(true);
-    window.setTimeout(() => setCopied(false), 1600);
+    if (copiedTimeoutRef.current) {
+      window.clearTimeout(copiedTimeoutRef.current);
+    }
+    copiedTimeoutRef.current = window.setTimeout(() => setCopied(false), 1600);
   };
+
+  useEffect(
+    () => () => {
+      if (copiedTimeoutRef.current) {
+        window.clearTimeout(copiedTimeoutRef.current);
+      }
+    },
+    [],
+  );
 
   return (
     <Grid columns={2}>
@@ -413,7 +435,7 @@ function MusicSection() {
   );
 }
 
-function ActiveSection({ activeOverlay }: { activeOverlay: OverlayId }) {
+const ActiveSection = memo(function ActiveSection({ activeOverlay }: { activeOverlay: OverlayId }) {
   switch (activeOverlay) {
     case "projects":
       return <ProjectsSection />;
@@ -434,7 +456,7 @@ function ActiveSection({ activeOverlay }: { activeOverlay: OverlayId }) {
     case "music":
       return <MusicSection />;
   }
-}
+});
 
 export function PortfolioOverlay() {
   const activeOverlay = useOverlayStore((state) => state.activeOverlay);

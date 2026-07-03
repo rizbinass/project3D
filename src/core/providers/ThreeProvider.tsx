@@ -24,7 +24,7 @@ export function ThreeProvider({ children }: { children: ReactNode }) {
       frameloop: "always",
       gl: {
         antialias: true,
-        alpha: true,
+        alpha: false,
         powerPreference: "high-performance",
       },
     }),

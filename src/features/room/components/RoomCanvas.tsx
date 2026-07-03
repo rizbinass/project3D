@@ -1,11 +1,23 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
+import { useThree } from "@react-three/fiber";
+import { useEffect } from "react";
 import { ACESFilmicToneMapping, SRGBColorSpace } from "three";
 import { useThreeRuntimeConfig } from "@/core/providers/ThreeProvider";
 import { qualityProfiles } from "@/lib/three/quality";
 import { useSceneStore } from "@/store/useSceneStore";
 import { RoomExperience } from "./RoomExperience";
+
+function RendererQualitySync({ shadowsEnabled }: { shadowsEnabled: boolean }) {
+  const gl = useThree((state) => state.gl);
+
+  useEffect(() => {
+    gl.shadowMap.enabled = shadowsEnabled;
+  }, [gl, shadowsEnabled]);
+
+  return null;
+}
 
 export function RoomCanvas() {
   const runtimeConfig = useThreeRuntimeConfig();
@@ -32,6 +44,7 @@ export function RoomCanvas() {
     >
       <color attach="background" args={["#05070a"]} />
       <fog attach="fog" args={["#05070a", 7.5, 15]} />
+      <RendererQualitySync shadowsEnabled={runtimeConfig.shadows && qualityProfile.shadows} />
       <RoomExperience />
     </Canvas>
   );

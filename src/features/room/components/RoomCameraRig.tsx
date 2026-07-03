@@ -23,7 +23,9 @@ export function RoomCameraRig() {
   const reducedMotion = usePrefersReducedMotion();
   const cameraPresetId = useSceneStore((state) => state.cameraPresetId);
   const sceneStatus = useSceneStore((state) => state.sceneStatus);
+  const focusedObjectId = useSceneStore((state) => state.focusedObjectId);
   const introComplete = useCameraIntro(sceneStatus === "ready");
+  const controlsEnabled = focusedObjectId === null;
 
   const activePreset = cameraPresets[cameraPresetId];
   const targetPosition = useMemo(
@@ -90,6 +92,7 @@ export function RoomCameraRig() {
       <OrbitControls
         ref={controlsRef}
         makeDefault
+        enabled={controlsEnabled}
         enableDamping
         dampingFactor={0.075}
         enablePan={false}
