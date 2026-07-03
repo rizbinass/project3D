@@ -16,4 +16,8 @@ export const envConfig = {
   analyticsEnabled: readBoolean(process.env.NEXT_PUBLIC_ENABLE_ANALYTICS, false),
   audioEnabled: readBoolean(process.env.NEXT_PUBLIC_ENABLE_AUDIO, false),
   debugPanelEnabled: readBoolean(process.env.NEXT_PUBLIC_ENABLE_DEBUG_PANEL, false),
+  roomDebugEnabled: readBoolean(
+    process.env.NEXT_PUBLIC_ENABLE_ROOM_DEBUG ?? process.env.NEXT_PUBLIC_ENABLE_DEBUG_PANEL,
+    false,
+  ),
 } as const;

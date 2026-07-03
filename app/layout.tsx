@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { AppProviders } from "@/core/providers/AppProviders";
 import { SEO_DEFAULTS } from "@/core/constants/seo.constants";
 import { siteConfig } from "@/core/config/site.config";
+import { SeoJsonLd } from "@/components/layout/SeoJsonLd";
 import { ThemeInitScript } from "@/components/layout/ThemeInitScript";
 import "@/styles/globals.css";
 
@@ -104,6 +105,20 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <ThemeInitScript />
+        <SeoJsonLd
+          id="portfolio-website-jsonld"
+          data={{
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: siteConfig.name,
+            description: siteConfig.description,
+            url: siteConfig.url,
+            creator: {
+              "@type": "Person",
+              name: siteConfig.creator,
+            },
+          }}
+        />
       </head>
       <body className={`${inter.variable} ${geistMono.variable}`}>
         <AppProviders>{children}</AppProviders>

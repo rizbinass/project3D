@@ -2,10 +2,10 @@
 
 import { Grid, Stats } from "@react-three/drei";
 import { Leva, useControls } from "leva";
+import { envConfig } from "@/core/config/env.config";
 
 export function RoomDebugLayer() {
-  const enabled =
-    process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_ENABLE_ROOM_DEBUG === "true";
+  const enabled = process.env.NODE_ENV === "development" && envConfig.roomDebugEnabled;
 
   if (!enabled) {
     return null;
