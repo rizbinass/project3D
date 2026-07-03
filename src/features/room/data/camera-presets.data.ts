@@ -58,13 +58,6 @@ export const cameraPresets: Record<CameraPresetId, CameraPreset> = {
     fov: 32,
     duration: 1.5,
   },
-  "focused-photography": {
-    id: "focused-photography",
-    position: [-3.1, 1.65, 2.25],
-    target: [-3.25, 0.72, 1.95],
-    fov: 32,
-    duration: 1.5,
-  },
   "focused-certificates": {
     id: "focused-certificates",
     position: [-3.25, 2.18, 1.05],
@@ -77,13 +70,6 @@ export const cameraPresets: Record<CameraPresetId, CameraPreset> = {
     position: [2.45, 2.25, 1.7],
     target: [3.1, 2.38, -3.52],
     fov: 30,
-    duration: 1.5,
-  },
-  "focused-music": {
-    id: "focused-music",
-    position: [-2.45, 1.55, 2.1],
-    target: [-2.55, 1.06, -1.9],
-    fov: 32,
     duration: 1.5,
   },
 };

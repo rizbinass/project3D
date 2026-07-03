@@ -251,22 +251,6 @@ function DeskSetup({ materials, geometries }: WorkspaceProps) {
         position={[1.35, 0.16, 0.22]}
         scale={[0.12, 0.22, 0.1]}
       />
-      <InteractiveGroup id="speaker">
-        <mesh
-          geometry={geometries.cylinderMedium}
-          material={materials.plastic}
-          position={[-1.55, 0.22, -0.28]}
-          rotation={[Math.PI / 2, 0, 0]}
-          scale={[0.24, 0.16, 0.24]}
-        />
-        <mesh
-          geometry={geometries.torus}
-          material={materials.metal}
-          position={[-1.55, 0.22, -0.1]}
-          rotation={[Math.PI / 2, 0, 0]}
-          scale={[0.14, 0.14, 0.14]}
-        />
-      </InteractiveGroup>
     </group>
   );
 }
@@ -407,22 +391,6 @@ function AmbientDecorations({ materials, geometries }: WorkspaceProps) {
         position={[0, 0.08, -3.52]}
         scale={[7.8, 0.045, 0.05]}
       />
-      <InteractiveGroup id="camera">
-        <mesh
-          geometry={geometries.box}
-          material={materials.plastic}
-          position={[-3.25, 0.72, 1.95]}
-          rotation={[0, 0.35, 0]}
-          scale={[0.62, 0.36, 0.32]}
-        />
-        <mesh
-          geometry={geometries.cylinderMedium}
-          material={materials.glass}
-          position={[-2.95, 0.72, 1.84]}
-          rotation={[Math.PI / 2, 0.35, 0]}
-          scale={[0.14, 0.08, 0.14]}
-        />
-      </InteractiveGroup>
       <InteractiveGroup id="window">
         <mesh
           geometry={geometries.box}

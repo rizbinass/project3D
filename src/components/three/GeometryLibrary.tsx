@@ -6,7 +6,6 @@ import {
   CapsuleGeometry,
   ConeGeometry,
   CylinderGeometry,
-  TorusGeometry,
   type BufferGeometry,
 } from "three";
 
@@ -17,7 +16,6 @@ export interface GeometryLibrary {
   cylinderMedium: BufferGeometry;
   cone: BufferGeometry;
   capsule: BufferGeometry;
-  torus: BufferGeometry;
 }
 
 export const useGeometryLibrary = (): GeometryLibrary =>
@@ -29,7 +27,6 @@ export const useGeometryLibrary = (): GeometryLibrary =>
       cylinderMedium: new CylinderGeometry(1, 1, 1, 24),
       cone: new ConeGeometry(1, 1, 20),
       capsule: new CapsuleGeometry(1, 1, 6, 12),
-      torus: new TorusGeometry(1, 0.12, 8, 24),
     }),
     [],
   );

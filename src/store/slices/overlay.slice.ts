@@ -1,13 +1,5 @@
 export type OverlayId =
-  | "projects"
-  | "skills"
-  | "about"
-  | "contact"
-  | "resume"
-  | "photography"
-  | "certificates"
-  | "experience"
-  | "music";
+  "projects" | "skills" | "about" | "contact" | "resume" | "certificates" | "experience";
 
 export interface OverlaySlice {
   activeOverlay: OverlayId | null;

@@ -39,12 +39,6 @@ export const interactiveObjects: Record<InteractiveObjectId, InteractiveObjectDe
     cameraPresetId: "focused-contact",
     label: "Contact",
   },
-  camera: {
-    id: "camera",
-    overlayId: "photography",
-    cameraPresetId: "focused-photography",
-    label: "Photography",
-  },
   books: {
     id: "books",
     overlayId: "certificates",
@@ -56,11 +50,5 @@ export const interactiveObjects: Record<InteractiveObjectId, InteractiveObjectDe
     overlayId: "experience",
     cameraPresetId: "focused-experience",
     label: "Experience",
-  },
-  speaker: {
-    id: "speaker",
-    overlayId: "music",
-    cameraPresetId: "focused-music",
-    label: "Music",
   },
 };

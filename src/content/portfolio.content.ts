@@ -1,11 +1,9 @@
 import {
   Award,
   BriefcaseBusiness,
-  Camera,
   Code2,
   GraduationCap,
   Mail,
-  Music2,
   Rocket,
   Sparkles,
   UserRound,
@@ -120,28 +118,10 @@ export const certificatesContent = [
   "Performance Engineering",
 ] as const;
 
-export const photographyContent = [
-  "Urban light study",
-  "Workspace details",
-  "Glass reflections",
-  "Night architecture",
-  "Studio portrait",
-  "Product silhouette",
-  "Motion blur",
-  "Minimal landscape",
-] as const;
-
 export const socialLinks = [
   { label: "GitHub", href: "https://github.com/" },
   { label: "LinkedIn", href: "https://linkedin.com/" },
   { label: "Email", href: "mailto:hello@example.com" },
-] as const;
-
-export const musicContent = [
-  "Ambient focus playlists",
-  "Synthwave coding sessions",
-  "Piano for deep work",
-  "Studio reference tracks",
 ] as const;
 
 export const sectionMeta = {
@@ -150,8 +130,6 @@ export const sectionMeta = {
   about: { title: "About", icon: UserRound },
   experience: { title: "Experience", icon: GraduationCap },
   certificates: { title: "Certificates", icon: Award },
-  photography: { title: "Photography", icon: Camera },
   resume: { title: "Resume", icon: Rocket },
   contact: { title: "Contact", icon: Mail },
-  music: { title: "Music", icon: Music2 },
 } as const;

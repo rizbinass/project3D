@@ -2,7 +2,7 @@
 
 ## Content
 
-- Replace placeholder portfolio data with real projects, case studies, certificates, photography, and resume assets.
+- Replace placeholder portfolio data with real projects, case studies, certificates, and resume assets.
 - Add production contact delivery through a server action or route handler.
 - Add downloadable resume and validated document asset checks.
 
@@ -11,7 +11,6 @@
 - Replace procedural primitives with optimized GLB models after running `pnpm assets:models`.
 - Add baked lighting and KTX2 texture variants for lower GPU memory use.
 - Add object-level LOD for mobile and low-power devices.
-- Add optional audio-reactive speaker animation behind `NEXT_PUBLIC_ENABLE_AUDIO`.
 
 ## Performance
 

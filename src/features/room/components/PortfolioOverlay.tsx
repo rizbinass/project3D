@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Copy, Code2, Download, ExternalLink, ImageIcon, Mail, Play, X } from "lucide-react";
+import { Check, Copy, Code2, Download, ExternalLink, ImageIcon, Mail, X } from "lucide-react";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -26,8 +26,6 @@ import {
   aboutContent,
   certificatesContent,
   experienceContent,
-  musicContent,
-  photographyContent,
   projectsContent,
   sectionMeta,
   skillsContent,
@@ -251,46 +249,6 @@ function CertificatesSection() {
   );
 }
 
-function PhotographySection() {
-  const [activeImage, setActiveImage] = useState<string | null>(null);
-
-  return (
-    <div className="grid gap-5">
-      <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-        {photographyContent.map((photo, index) => (
-          <button
-            key={photo}
-            type="button"
-            className="border-border bg-surface shadow-soft mb-4 grid w-full break-inside-avoid place-items-center rounded-lg border p-6 text-left transition hover:-translate-y-0.5"
-            style={{ minHeight: `${index % 3 === 0 ? 220 : index % 3 === 1 ? 280 : 180}px` }}
-            onClick={() => setActiveImage(photo)}
-          >
-            <Icon icon={ImageIcon} tone="accent" />
-            <span className="text-text-secondary mt-3 text-sm">{photo}</span>
-          </button>
-        ))}
-      </div>
-      <AnimatePresence>
-        {activeImage && (
-          <motion.button
-            type="button"
-            className="bg-overlay fixed inset-0 z-[var(--z-critical)] grid place-items-center p-6 backdrop-blur-md"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setActiveImage(null)}
-          >
-            <div className="border-border bg-card shadow-strong grid aspect-[4/3] w-[min(52rem,92vw)] place-items-center rounded-xl border">
-              <Icon icon={ImageIcon} tone="accent" size="xl" />
-              <span className="text-text-secondary">{activeImage}</span>
-            </div>
-          </motion.button>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
 function ResumeSection() {
   return (
     <Grid columns={2}>
@@ -417,24 +375,6 @@ function ContactSection() {
   );
 }
 
-function MusicSection() {
-  return (
-    <div className="grid gap-4">
-      {musicContent.map((track) => (
-        <Card key={track} className="flex items-center justify-between gap-4">
-          <div>
-            <Typography as="h3" variant="heading-s">
-              {track}
-            </Typography>
-            <Typography variant="body-sm">Curated listening for calm, focused building.</Typography>
-          </div>
-          <IconButton icon={Play} label={`Play ${track}`} variant="glass" />
-        </Card>
-      ))}
-    </div>
-  );
-}
-
 const ActiveSection = memo(function ActiveSection({ activeOverlay }: { activeOverlay: OverlayId }) {
   switch (activeOverlay) {
     case "projects":
@@ -447,14 +387,10 @@ const ActiveSection = memo(function ActiveSection({ activeOverlay }: { activeOve
       return <ExperienceSection />;
     case "certificates":
       return <CertificatesSection />;
-    case "photography":
-      return <PhotographySection />;
     case "resume":
       return <ResumeSection />;
     case "contact":
       return <ContactSection />;
-    case "music":
-      return <MusicSection />;
   }
 });
 

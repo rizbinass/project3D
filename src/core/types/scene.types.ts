@@ -5,7 +5,7 @@ export type SceneStatus = "idle" | "booting" | "ready" | "transitioning" | "susp
 export type RoomZone = "entry" | "projects" | "skills" | "about" | "contact" | "resume";
 
 export type InteractiveObjectId =
-  "monitor" | "keyboard" | "laptop" | "plant" | "window" | "camera" | "books" | "clock" | "speaker";
+  "monitor" | "keyboard" | "laptop" | "plant" | "window" | "books" | "clock";
 
 export type CameraPresetId =
   | "entry"
@@ -15,10 +15,8 @@ export type CameraPresetId =
   | "focused-about"
   | "focused-contact"
   | "focused-resume"
-  | "focused-photography"
   | "focused-certificates"
-  | "focused-experience"
-  | "focused-music";
+  | "focused-experience";
 
 export interface SceneStateSnapshot {
   status: SceneStatus;
