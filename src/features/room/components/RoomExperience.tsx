@@ -5,9 +5,9 @@ import { RoomCameraRig } from "./RoomCameraRig";
 import { RoomDebugLayer } from "./RoomDebugLayer";
 import { RoomDisplaySurfaces } from "./RoomDisplaySurfaces";
 import { RoomEnvironment } from "./RoomEnvironment";
+import { RoomGlb } from "./RoomGlb";
 import { RoomInteractionLayer } from "./RoomInteractionLayer";
 import { RoomLighting } from "./RoomLighting";
-import { RoomModel } from "./RoomModel";
 import { RoomParticles } from "./RoomParticles";
 import { RoomPerformanceMonitor } from "./RoomPerformanceMonitor";
 import { RoomPostProcessing } from "./RoomPostProcessing";
@@ -20,7 +20,7 @@ export function RoomExperience() {
       <Suspense fallback={null}>
         <RoomEnvironment />
         <RoomLighting />
-        <RoomModel />
+        <RoomGlb />
         <RoomDisplaySurfaces />
         <RoomParticles />
         <RoomInteractionLayer />

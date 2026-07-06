@@ -1,1 +1,0 @@
-export { gsap } from "gsap";

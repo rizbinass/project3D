@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import type { SceneQualityLevel } from "@/core/constants/scene.constants";
-import { usePerformanceStore } from "@/store/usePerformanceStore";
 import { useSceneStore } from "@/store/useSceneStore";
 
 const getInitialQuality = (): SceneQualityLevel => {
@@ -24,17 +23,11 @@ const getInitialQuality = (): SceneQualityLevel => {
 export const useSceneQuality = (): SceneQualityLevel => {
   const qualityLevel = useSceneStore((state) => state.qualityLevel);
   const setQualityLevel = useSceneStore((state) => state.setQualityLevel);
-  const setTextureQuality = usePerformanceStore((state) => state.setTextureQuality);
-  const setShadowQuality = usePerformanceStore((state) => state.setShadowQuality);
-  const setLodLevel = usePerformanceStore((state) => state.setLodLevel);
 
   useEffect(() => {
     const quality = getInitialQuality();
     setQualityLevel(quality);
-    setTextureQuality(quality);
-    setShadowQuality(quality);
-    setLodLevel(quality);
-  }, [setLodLevel, setQualityLevel, setShadowQuality, setTextureQuality]);
+  }, [setQualityLevel]);
 
   return qualityLevel;
 };

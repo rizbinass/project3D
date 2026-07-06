@@ -10,41 +10,10 @@ export const socialLinks = {
   linkedin: "https://linkedin.com/",
 } as const;
 
+// Mesh name groups used by material mapping and shadow configuration.
+// Only windowGlass is currently overridden; everything else stays as GLB exports.
 export const roomMeshNameMap = {
-  wall: ["wall"],
-  floor: ["floor"],
-  desk: ["table", "Base", "Top", "Feet", "Drawer.top", "Drawer.mid", "Drawer.bottom"],
-  chair: ["Chair"],
-  monitor: ["monitor"],
-  pc: ["pc"],
-  keyboard: ["keyboard"],
-  mouse: ["Mouse"],
-  lamp: ["headLamp", "boneLamp", "standLamp"],
-  mirrorFrame: ["mirrorFrame"],
-  mirror: ["mirror"],
-  github: ["github", "githubFrame", "githubLogo"],
-  instagram: ["instagram", "instagramFrame", "instagramLogo"],
-  linkedin: ["linkedin", "linkedinFrame", "Curve.083"],
-  door: ["doorBlock", "doorFrame", "doorHolder"],
-  windowFrame: ["windowFrame"],
   windowGlass: ["windowGlass"],
-  plantPot: ["ashtray"],
-  plantLeaves: ["cigarrete"],
-  photoFrame: ["photoFrame"],
-  photo: ["photo"],
-  logo: [
-    "letterR",
-    "letterI2",
-    "letterZ",
-    "letterB",
-    "letterI1",
-    "letterN",
-    "letterS1",
-    "letterA",
-    "letterS2",
-  ],
-  actionFigure: ["actionFigure"],
-  books: ["papan"],
 } as const;
 
 export const meshInteractionMap: Partial<Record<string, InteractiveObjectId>> = {

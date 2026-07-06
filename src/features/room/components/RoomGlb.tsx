@@ -7,7 +7,6 @@ import { useCallback, useEffect, useMemo } from "react";
 import {
   Box3,
   Color,
-  MathUtils,
   Mesh,
   MeshPhysicalMaterial,
   MeshStandardMaterial,
@@ -16,11 +15,9 @@ import {
   TextureLoader,
   Vector3,
 } from "three";
-import type { CameraState } from "@/core/types/scene.types";
-import { createStandardMaterial } from "@/lib/three/materials";
 import {
-  setFittedRoomCameraState,
   setRoomSceneRoot,
+  setInitialCameraState,
 } from "@/features/room/data/room-runtime-camera.data";
 import {
   meshInteractionMap,
@@ -40,18 +37,8 @@ const placeholderPhotoTexture = new TextureLoader().load(
 );
 placeholderPhotoTexture.colorSpace = SRGBColorSpace;
 
-const cyanGlow = "#53d7ff";
-const fitDirection = new Vector3(0.52, 0.34, 1);
-
+// Only window glass needs a custom material. Everything else stays as GLB exports.
 const createRoomMaterials = () => ({
-  wall: createStandardMaterial({ color: "#f5f0e8", roughness: 0.92, metalness: 0.02 }),
-  floor: createStandardMaterial({ color: "#c9a97a", roughness: 0.55, metalness: 0.06 }),
-  desk: createStandardMaterial({ color: "#5a3921", roughness: 0.48, metalness: 0.1 }),
-  door: createStandardMaterial({ color: "#6b4a30", roughness: 0.5, metalness: 0.08 }),
-  chairLeather: createStandardMaterial({ color: "#1a1a1e", roughness: 0.68, metalness: 0.02 }),
-  brushedAluminum: createStandardMaterial({ color: "#d0d4d8", roughness: 0.18, metalness: 0.95 }),
-  matteBlack: createStandardMaterial({ color: "#1c1c20", roughness: 0.72, metalness: 0.2 }),
-  brass: createStandardMaterial({ color: "#c49a42", roughness: 0.25, metalness: 0.98 }),
   glass: new MeshPhysicalMaterial({
     color: "#d8e8f4",
     roughness: 0.02,
@@ -65,24 +52,6 @@ const createRoomMaterials = () => ({
     specularIntensity: 1.0,
     specularColor: new Color("#c0d8f0"),
     side: 2,
-  }),
-  plantPot: createStandardMaterial({ color: "#f0ece4", roughness: 0.2, metalness: 0.02 }),
-  leaves: createStandardMaterial({ color: "#4a7a42", roughness: 0.82, metalness: 0.01 }),
-  bookMuted: createStandardMaterial({ color: "#8a7a72", roughness: 0.78, metalness: 0.03 }),
-  logoBody: createStandardMaterial({ color: "#12141a", roughness: 0.3, metalness: 0.18 }),
-  screenOff: createStandardMaterial({
-    color: "#0c1018",
-    roughness: 0.22,
-    metalness: 0.08,
-    emissive: "#0a1420",
-    emissiveIntensity: 0.06,
-  }),
-  rgb: createStandardMaterial({
-    color: "#142838",
-    roughness: 0.18,
-    metalness: 0.15,
-    emissive: "#42d6ff",
-    emissiveIntensity: 0.08,
   }),
 });
 
@@ -100,60 +69,14 @@ function nameMatches(name: string, candidates: readonly string[]) {
 }
 
 function mapMaterialKey(name: string) {
-  if (nameMatches(name, roomMeshNameMap.wall)) return "wall";
-  if (nameMatches(name, roomMeshNameMap.floor)) return "floor";
-  if (nameMatches(name, roomMeshNameMap.desk)) return "desk";
-  if (nameMatches(name, roomMeshNameMap.chair)) return "chairLeather";
-  if (nameMatches(name, roomMeshNameMap.monitor)) return "screenOff";
-  if (nameMatches(name, roomMeshNameMap.pc)) return "matteBlack";
-  if (nameMatches(name, roomMeshNameMap.keyboard) || nameMatches(name, roomMeshNameMap.mouse))
-    return "rgb";
-  if (nameMatches(name, roomMeshNameMap.lamp)) return "brass";
-  if (nameMatches(name, roomMeshNameMap.door)) return "door";
-  if (nameMatches(name, roomMeshNameMap.windowFrame)) return "brushedAluminum";
+  // Only override materials that need special treatment.
+  // Everything else stays exactly as exported from Blender.
   if (nameMatches(name, roomMeshNameMap.windowGlass)) return "glass";
-  if (nameMatches(name, roomMeshNameMap.plantPot)) return "plantPot";
-  if (nameMatches(name, roomMeshNameMap.plantLeaves)) return "leaves";
-  if (nameMatches(name, roomMeshNameMap.books)) return "bookMuted";
-  if (nameMatches(name, roomMeshNameMap.logo)) return "logoBody";
-  if (nameMatches(name, roomMeshNameMap.photoFrame)) return "desk";
-  if (nameMatches(name, roomMeshNameMap.photo)) return "screenOff";
-  if (
-    nameMatches(name, roomMeshNameMap.github) ||
-    nameMatches(name, roomMeshNameMap.instagram) ||
-    nameMatches(name, roomMeshNameMap.linkedin)
-  ) {
-    return "matteBlack";
-  }
   return null;
-}
-
-function computeFittedCameraState(root: Object3D): CameraState {
-  const bounds = new Box3().setFromObject(root);
-  const center = bounds.getCenter(new Vector3());
-  const size = bounds.getSize(new Vector3());
-  const maxDim = Math.max(size.x, size.y, size.z);
-  const radius = size.length() * 0.35;
-  const direction = fitDirection.clone().normalize();
-  const position = center.clone().add(direction.multiplyScalar(radius * 2.1 + maxDim * 0.6));
-
-  position.y = Math.max(center.y + size.y * 0.22, bounds.min.y + size.y * 0.62);
-  position.z = Math.max(position.z, bounds.max.z + size.z * 0.15);
-
-  const target = center.clone();
-  target.y = bounds.min.y + size.y * 0.44;
-
-  return {
-    position: [position.x, position.y, position.z],
-    target: [target.x, target.y, target.z],
-    fov: 42,
-  };
 }
 
 export function RoomGlb() {
   const hoveredObjectId = useInteractionStore((state) => state.hoveredObjectId);
-  const activeExperience = useSceneStore((state) => state.activeExperience);
-  const timeMode = useSceneStore((state) => state.timeMode);
   const focusedObjectId = useSceneStore((state) => state.focusedObjectId);
   const { focusObject, setHoveredObjectId, clearHover } = useRoomObjectInteraction();
   const { scene } = useGLTF(roomGlbPath);
@@ -175,8 +98,12 @@ export function RoomGlb() {
     forEachMesh(cloned, (mesh) => {
       mesh.castShadow = !nameMatches(mesh.name, roomMeshNameMap.windowGlass);
       mesh.receiveShadow = true;
-      mesh.frustumCulled = true;
+      // ponytail: frustumCulled=false prevents clipping on objects
+      // whose world-space bounding boxes are stale after the PI rotation.
+      mesh.frustumCulled = false;
 
+      // Only override photo placeholder, window glass, and mirror.
+      // Everything else stays exactly as exported from Blender.
       if (mesh.name === "photo") {
         mesh.material = new MeshStandardMaterial({
           map: placeholderPhotoTexture,
@@ -186,36 +113,19 @@ export function RoomGlb() {
         return;
       }
 
-      const materialKey = mapMaterialKey(mesh.name);
-      if (!materialKey) {
-        return;
-      }
-
-      if (mesh.name === "actionFigure") {
-        return;
-      }
-
-      if (Array.isArray(mesh.material)) {
-        mesh.material = mesh.material.map((part, index) => {
-          if (mesh.name === "pc" && index === 1) {
-            return materials.rgb.clone();
-          }
-          if (mesh.name === "keyboard" && index >= 3) {
-            return materials.rgb.clone();
-          }
-          return materials[materialKey].clone();
-        });
-      } else if (mesh.name === "mirror") {
+      if (mesh.name === "mirror") {
         mesh.visible = false;
-      } else {
+        return;
+      }
+
+      const materialKey = mapMaterialKey(mesh.name);
+      if (materialKey) {
         mesh.material = materials[materialKey].clone();
       }
     });
 
     return cloned;
   }, [materials, scene]);
-
-  const fittedCameraState = useMemo(() => computeFittedCameraState(preparedScene), [preparedScene]);
 
   const animatedInteractiveMeshes = useMemo(() => {
     const meshes: Mesh[] = [];
@@ -271,8 +181,25 @@ export function RoomGlb() {
   );
 
   useEffect(() => {
-    setFittedRoomCameraState(fittedCameraState);
     setRoomSceneRoot(preparedScene);
+
+    // Compute initial camera from GLB bounding box
+    const bbox = new Box3().setFromObject(preparedScene);
+    const center = bbox.getCenter(new Vector3());
+    const size = bbox.getSize(new Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const distance = maxDim * 1.6;
+
+    // Position camera outside the room, looking toward center
+    const direction = new Vector3(0.5, 0.35, 1).normalize();
+    const position = center.clone().add(direction.multiplyScalar(distance));
+    position.y = Math.max(center.y + size.y * 0.25, bbox.min.y + size.y * 0.6);
+
+    setInitialCameraState({
+      position: [position.x, position.y, position.z],
+      target: [center.x, center.y, center.z],
+      fov: 45,
+    });
 
     forEachMesh(preparedScene, (mesh) => {
       if (!interactiveNames.has(mesh.name)) {
@@ -282,7 +209,9 @@ export function RoomGlb() {
       mesh.userData.interactive = true;
       mesh.userData.objectId = meshInteractionMap[mesh.name];
     });
-  }, [fittedCameraState, interactiveNames, preparedScene]);
+  }, [interactiveNames, preparedScene]);
+
+  const _tempScale = useMemo(() => new Vector3(), []);
 
   useFrame((_, delta) => {
     const dampAlpha = 1 - Math.exp(-delta * 10);
@@ -292,82 +221,11 @@ export function RoomGlb() {
         return;
       }
 
-      const isHovered = hoveredObjectId === mesh.userData.objectId;
-      const isFocused = focusedObjectId === mesh.userData.objectId;
-      const active = isHovered || isFocused;
+      const active =
+        hoveredObjectId === mesh.userData.objectId || focusedObjectId === mesh.userData.objectId;
       const targetScale = active ? roomHoverScale : 1;
-      mesh.scale.lerp(new Vector3(targetScale, targetScale, targetScale), dampAlpha);
-
-      // Subtle emissive highlight on hover for interactive objects
-      const applyEmissive = (
-        mat: MeshStandardMaterial,
-        baseIntensity: number,
-        hoverBoost: number,
-      ) => {
-        if (!mat.emissive) return;
-        const target = active ? baseIntensity + hoverBoost : baseIntensity;
-        mat.emissiveIntensity = MathUtils.damp(mat.emissiveIntensity, target, 6, delta);
-      };
-
-      if (mesh.name === "monitor" && mesh.material instanceof MeshStandardMaterial) {
-        const base = activeExperience === "monitor" || timeMode === "night" ? 1.25 : 0.06;
-        applyEmissive(mesh.material, base, 0.3);
-      }
-
-      if (
-        (mesh.name === "keyboard" || mesh.name === "Mouse" || mesh.name === "pc") &&
-        Array.isArray(mesh.material)
-      ) {
-        mesh.material.forEach((part) => {
-          if (!(part instanceof MeshStandardMaterial)) return;
-          const rgbActive = timeMode === "night" || activeExperience === "monitor";
-          part.emissive.set(cyanGlow);
-          const base = rgbActive ? 0.85 : 0.06;
-          applyEmissive(part, base, 0.25);
-        });
-      }
-
-      if (nameMatches(mesh.name, roomMeshNameMap.logo)) {
-        const material = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
-        if (material instanceof MeshStandardMaterial) {
-          material.emissive.set(cyanGlow);
-          const base = timeMode === "night" ? 0.92 : 0.06;
-          applyEmissive(material, base, 0.3);
-        }
-      }
-
-      // Emissive highlight for non-LED interactive objects on hover
-      if (
-        !nameMatches(mesh.name, roomMeshNameMap.logo) &&
-        mesh.name !== "monitor" &&
-        mesh.name !== "keyboard" &&
-        mesh.name !== "Mouse" &&
-        mesh.name !== "pc" &&
-        mesh.material instanceof MeshStandardMaterial &&
-        active
-      ) {
-        if (!mesh.userData.baseEmissiveIntensity) {
-          mesh.userData.baseEmissiveIntensity = mesh.material.emissiveIntensity;
-        }
-        mesh.material.emissive.set("#ffffff");
-        mesh.material.emissiveIntensity = MathUtils.damp(
-          mesh.material.emissiveIntensity,
-          0.12,
-          6,
-          delta,
-        );
-      } else if (
-        mesh.material instanceof MeshStandardMaterial &&
-        mesh.userData.baseEmissiveIntensity !== undefined &&
-        !active
-      ) {
-        mesh.material.emissiveIntensity = MathUtils.damp(
-          mesh.material.emissiveIntensity,
-          mesh.userData.baseEmissiveIntensity,
-          6,
-          delta,
-        );
-      }
+      _tempScale.set(targetScale, targetScale, targetScale);
+      mesh.scale.lerp(_tempScale, dampAlpha);
     });
   });
 

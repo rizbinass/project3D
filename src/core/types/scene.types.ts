@@ -1,5 +1,3 @@
-import type { SceneQualityLevel } from "@/core/constants/scene.constants";
-
 export type SceneStatus = "idle" | "booting" | "ready" | "transitioning" | "suspended";
 
 export type TimeMode = "day" | "night";
@@ -12,12 +10,9 @@ export interface CameraState {
   fov: number;
 }
 
-export type RoomZone = "entry" | "projects" | "skills" | "about" | "contact" | "resume";
-
 export type InteractiveObjectId =
   | "monitor"
   | "keyboard"
-  | "laptop"
   | "plant"
   | "window"
   | "books"
@@ -29,22 +24,3 @@ export type InteractiveObjectId =
   | "github"
   | "instagram"
   | "linkedin";
-
-export type CameraPresetId =
-  | "entry"
-  | "idle"
-  | "focused-projects"
-  | "focused-skills"
-  | "focused-about"
-  | "focused-contact"
-  | "focused-resume"
-  | "focused-certificates"
-  | "focused-experience";
-
-export interface SceneStateSnapshot {
-  status: SceneStatus;
-  activeZone: RoomZone;
-  focusedObjectId: InteractiveObjectId | null;
-  cameraPresetId: CameraPresetId;
-  qualityLevel: SceneQualityLevel;
-}

@@ -2,79 +2,54 @@
 
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef, type ComponentRef } from "react";
-import { MathUtils, Vector3 } from "three";
+import { useEffect, useRef, type ComponentRef } from "react";
+import { Vector3 } from "three";
 import type { CameraState } from "@/core/types/scene.types";
-import { getFittedRoomCameraState } from "@/features/room/data/room-runtime-camera.data";
-import { useCameraIntro } from "@/features/room/hooks/useCameraIntro";
-import { useRoomObjectInteraction } from "@/features/room/hooks/useRoomObjectInteraction";
-import { useResponsiveCamera } from "@/features/room/hooks/useResponsiveCamera";
-import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
-import { useInteractionStore } from "@/store/useInteractionStore";
+import { getInitialCameraState } from "@/features/room/data/room-runtime-camera.data";
 import { useSceneStore } from "@/store/useSceneStore";
 
-const introDurationSeconds = 4.8;
-const LERP_SPEED = 3.5;
+const FALLBACK_CAMERA: CameraState = {
+  position: [2.8, 1.6, 4.8],
+  target: [0, 1.2, 0],
+  fov: 45,
+};
+
+const LERP_SPEED = 3.0;
 
 export function RoomCameraRig() {
   const controlsRef = useRef<ComponentRef<typeof OrbitControls>>(null);
-  const introStartRef = useRef<number | null>(null);
-  const introPositionRef = useRef(new Vector3());
-  const introTargetRef = useRef(new Vector3());
-  const lastCameraStateRef = useRef<CameraState | null>(null);
-  const idlePositionRef = useRef(new Vector3());
-  const { camera, size } = useThree();
-  const responsiveCamera = useResponsiveCamera();
-  const reducedMotion = usePrefersReducedMotion();
-  const { closeActiveExperience } = useRoomObjectInteraction();
-  const sceneStatus = useSceneStore((state) => state.sceneStatus);
-  const activeExperience = useSceneStore((state) => state.activeExperience);
-  const cameraTargetState = useSceneStore((state) => state.cameraTargetState);
-  const preservePreviousCameraState = useSceneStore((state) => state.preservePreviousCameraState);
-  const setPreviousCameraState = useSceneStore((state) => state.setPreviousCameraState);
-  const setCameraTargetState = useSceneStore((state) => state.setCameraTargetState);
-  const setTransitioningCamera = useSceneStore((state) => state.setTransitioningCamera);
-  const setInteractionLocked = useInteractionStore((state) => state.setInteractionLocked);
-  const introComplete = useCameraIntro(sceneStatus === "ready");
-  // OrbitControls always enabled - user can always orbit/zoom
-  const controlsEnabled = true;
+  const { camera } = useThree();
 
-  const fittedCameraState = getFittedRoomCameraState();
-  const baseCameraState = useMemo<CameraState>(
-    () =>
-      fittedCameraState ?? {
-        position: [0, 3, 8],
-        target: [0, 1, 0],
-        fov: 42,
-      },
-    [fittedCameraState],
-  );
+  const cameraTargetState = useSceneStore((s) => s.cameraTargetState);
+  const previousCameraState = useSceneStore((s) => s.previousCameraState);
+  const setPreviousCameraState = useSceneStore((s) => s.setPreviousCameraState);
 
-  const targetPositionRef = useRef(new Vector3(...baseCameraState.position));
-  const targetLookAtRef = useRef(new Vector3(...baseCameraState.target));
+  // Lerp targets — start at fallback, update when GLB provides computed camera
+  const lerpTargetPos = useRef(new Vector3(...FALLBACK_CAMERA.position));
+  const lerpTargetLookAt = useRef(new Vector3(...FALLBACK_CAMERA.target));
+  const savedCameraState = useRef<CameraState | null>(null);
   const isTransitioningRef = useRef(false);
+  const hasInitializedRef = useRef(false);
 
+  // After GLB loads, pick up computed initial camera and transition to it
   useEffect(() => {
-    introPositionRef.current.set(...baseCameraState.position);
-    introTargetRef.current.set(...baseCameraState.target);
-  }, [baseCameraState.position, baseCameraState.target]);
+    if (!hasInitializedRef.current) {
+      const initial = getInitialCameraState();
+      if (initial) {
+        lerpTargetPos.current.set(...initial.position);
+        lerpTargetLookAt.current.set(...initial.target);
+        isTransitioningRef.current = true;
+        hasInitializedRef.current = true;
+      }
+    }
+  });
 
+  // Handle camera target state changes
   useEffect(() => {
     if (cameraTargetState) {
-      targetPositionRef.current.set(
-        cameraTargetState.position[0],
-        cameraTargetState.position[1],
-        cameraTargetState.position[2],
-      );
-      targetLookAtRef.current.set(
-        cameraTargetState.target[0],
-        cameraTargetState.target[1],
-        cameraTargetState.target[2],
-      );
-      isTransitioningRef.current = true;
-
-      if (preservePreviousCameraState) {
-        setPreviousCameraState({
+      // Save current state before focusing
+      if (!savedCameraState.current) {
+        savedCameraState.current = {
           position: [camera.position.x, camera.position.y, camera.position.z],
           target: controlsRef.current
             ? [
@@ -82,134 +57,94 @@ export function RoomCameraRig() {
                 controlsRef.current.target.y,
                 controlsRef.current.target.z,
               ]
-            : [targetLookAtRef.current.x, targetLookAtRef.current.y, targetLookAtRef.current.z],
-          fov: "fov" in camera ? camera.fov : baseCameraState.fov,
-        });
+            : [lerpTargetLookAt.current.x, lerpTargetLookAt.current.y, lerpTargetLookAt.current.z],
+          fov: "fov" in camera ? camera.fov : FALLBACK_CAMERA.fov,
+        };
+        setPreviousCameraState(savedCameraState.current);
       }
 
-      setTransitioningCamera(true);
-      setInteractionLocked(true);
-
-      const timeout = window.setTimeout(() => {
-        setCameraTargetState(null);
-        setTransitioningCamera(false);
-        setInteractionLocked(false);
-        isTransitioningRef.current = false;
-      }, 920);
-
-      return () => window.clearTimeout(timeout);
-    } else {
-      targetPositionRef.current.set(...baseCameraState.position);
-      targetLookAtRef.current.set(...baseCameraState.target);
+      lerpTargetPos.current.set(...cameraTargetState.position);
+      lerpTargetLookAt.current.set(...cameraTargetState.target);
+      isTransitioningRef.current = true;
+    } else if (savedCameraState.current) {
+      // Return to saved state
+      const returnState = previousCameraState ?? savedCameraState.current;
+      lerpTargetPos.current.set(...returnState.position);
+      lerpTargetLookAt.current.set(...returnState.target);
+      isTransitioningRef.current = true;
+      savedCameraState.current = null;
     }
-  }, [
-    baseCameraState,
-    camera,
-    cameraTargetState,
-    preservePreviousCameraState,
-    setCameraTargetState,
-    setInteractionLocked,
-    setPreviousCameraState,
-    setTransitioningCamera,
-  ]);
+  }, [cameraTargetState, previousCameraState, camera, setPreviousCameraState]);
 
-  useEffect(() => {
-    camera.position.set(...baseCameraState.position);
-    camera.lookAt(...baseCameraState.target);
-
-    if (controlsRef.current) {
-      controlsRef.current.target.set(...baseCameraState.target);
-      controlsRef.current.update();
-    }
-  }, [baseCameraState.position, baseCameraState.target, camera]);
-
+  // Escape key → return to previous
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && activeExperience) {
-        closeActiveExperience();
+      if (event.key === "Escape") {
+        const store = useSceneStore.getState();
+        if (!store.previousCameraState && !savedCameraState.current) return;
+
+        const returnState =
+          store.previousCameraState ?? savedCameraState.current ?? FALLBACK_CAMERA;
+
+        lerpTargetPos.current.set(...returnState.position);
+        lerpTargetLookAt.current.set(...returnState.target);
+        isTransitioningRef.current = true;
+
+        store.setCameraTargetState(null);
+        store.setPreviousCameraState(null);
+        savedCameraState.current = null;
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [activeExperience, closeActiveExperience]);
+  }, []);
 
-  useFrame(({ clock }, delta) => {
+  // ONE useFrame — only lerp during transitions
+  useFrame((_, delta) => {
+    if (!isTransitioningRef.current) return;
+
     const controls = controlsRef.current;
-    const elapsed = clock.getElapsedTime();
-    const targetFov =
-      (cameraTargetState?.fov ?? baseCameraState.fov) +
-      responsiveCamera.fovOffset +
-      (size.width < 640 ? 4 : 0);
-
-    if ("fov" in camera) {
-      const nextFov = MathUtils.damp(camera.fov, targetFov, 3.2, delta);
-      if (Math.abs(camera.fov - nextFov) > 0.001) {
-        camera.fov = nextFov;
-        camera.updateProjectionMatrix();
-      }
-    }
-
-    if (isTransitioningRef.current || cameraTargetState) {
-      lastCameraStateRef.current = {
-        position: [camera.position.x, camera.position.y, camera.position.z],
-        target: controls
-          ? [controls.target.x, controls.target.y, controls.target.z]
-          : [targetLookAtRef.current.x, targetLookAtRef.current.y, targetLookAtRef.current.z],
-        fov: "fov" in camera ? camera.fov : targetFov,
-      };
-    }
-
     const lerpFactor = 1 - Math.exp(-delta * LERP_SPEED);
 
-    if (!introComplete && !reducedMotion) {
-      introStartRef.current ??= elapsed;
-      const progress = MathUtils.clamp(
-        (elapsed - introStartRef.current) / introDurationSeconds,
-        0,
-        1,
-      );
-      const eased = 1 - Math.pow(1 - progress, 3);
-      camera.position.lerpVectors(introPositionRef.current, targetPositionRef.current, eased);
-      controls?.target.lerpVectors(introTargetRef.current, targetLookAtRef.current, eased);
-    } else {
-      const breathing = Math.sin(elapsed * 0.42) * 0.02;
-      idlePositionRef.current.copy(targetPositionRef.current);
-      idlePositionRef.current.y += breathing;
-      camera.position.lerp(idlePositionRef.current, lerpFactor);
-      controls?.target.lerp(targetLookAtRef.current, lerpFactor * 1.2);
-    }
-
+    camera.position.lerp(lerpTargetPos.current, lerpFactor);
+    controls?.target.lerp(lerpTargetLookAt.current, lerpFactor);
     controls?.update();
+
+    // Check if close enough to stop transitioning
+    const posDist = camera.position.distanceTo(lerpTargetPos.current);
+    if (posDist < 0.01) {
+      isTransitioningRef.current = false;
+    }
   });
+
+  const initialCamera = getInitialCameraState() ?? FALLBACK_CAMERA;
 
   return (
     <>
       <PerspectiveCamera
         makeDefault
-        position={baseCameraState.position}
-        fov={baseCameraState.fov}
-        near={0.1}
-        far={80}
+        position={initialCamera.position}
+        fov={initialCamera.fov}
+        near={0.05}
+        far={100}
       />
       <OrbitControls
         ref={controlsRef}
         makeDefault
-        enabled={controlsEnabled}
+        enabled
         enableDamping
         dampingFactor={0.08}
         enablePan
-        panSpeed={0.5}
+        panSpeed={0.8}
         enableZoom
-        minDistance={2.5}
-        maxDistance={14}
-        minPolarAngle={Math.PI / 6}
-        maxPolarAngle={Math.PI / 2.1}
-        minAzimuthAngle={-Math.PI / 2.8}
-        maxAzimuthAngle={Math.PI / 2.8}
-        rotateSpeed={0.6}
-        zoomSpeed={0.5}
-        target={baseCameraState.target}
+        minDistance={1.5}
+        maxDistance={12}
+        minPolarAngle={Math.PI / 8}
+        maxPolarAngle={Math.PI / 2.05}
+        rotateSpeed={0.7}
+        zoomSpeed={0.6}
+        target={initialCamera.target}
       />
     </>
   );
