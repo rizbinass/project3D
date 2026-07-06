@@ -38,12 +38,12 @@ export function RoomCanvas() {
       onCreated={({ gl }) => {
         gl.outputColorSpace = SRGBColorSpace;
         gl.toneMapping = ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.06;
+        gl.toneMappingExposure = 1.4;
         gl.shadowMap.enabled = runtimeConfig.shadows && qualityProfile.shadows;
       }}
     >
-      <color attach="background" args={["#05070a"]} />
-      <fog attach="fog" args={["#05070a", 7.5, 15]} />
+      <color attach="background" args={["#080c12"]} />
+      <fog attach="fog" args={["#080c12", 12, 28]} />
       <RendererQualitySync shadowsEnabled={runtimeConfig.shadows && qualityProfile.shadows} />
       <RoomExperience />
     </Canvas>

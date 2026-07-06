@@ -51,4 +51,46 @@ export const interactiveObjects: Record<InteractiveObjectId, InteractiveObjectDe
     cameraPresetId: "focused-experience",
     label: "Experience",
   },
+  pc: {
+    id: "pc",
+    overlayId: "projects",
+    cameraPresetId: "focused-projects",
+    label: "Projects",
+  },
+  mouse: {
+    id: "mouse",
+    overlayId: "projects",
+    cameraPresetId: "focused-projects",
+    label: "Projects",
+  },
+  lamp: {
+    id: "lamp",
+    overlayId: "about",
+    cameraPresetId: "focused-about",
+    label: "Lamp",
+  },
+  "photo-frame": {
+    id: "photo-frame",
+    overlayId: "about",
+    cameraPresetId: "focused-about",
+    label: "Photo",
+  },
+  github: {
+    id: "github",
+    overlayId: "projects",
+    cameraPresetId: "focused-projects",
+    label: "GitHub",
+  },
+  instagram: {
+    id: "instagram",
+    overlayId: "about",
+    cameraPresetId: "focused-about",
+    label: "Instagram",
+  },
+  linkedin: {
+    id: "linkedin",
+    overlayId: "experience",
+    cameraPresetId: "focused-experience",
+    label: "LinkedIn",
+  },
 };

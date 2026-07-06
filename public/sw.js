@@ -1,4 +1,4 @@
-const CACHE_VERSION = "portfolio-room-v1";
+const CACHE_VERSION = "portfolio-room-v2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const STATIC_ASSET_PATTERN =
   /\.(?:js|css|woff2?|png|jpg|jpeg|webp|avif|ico|svg|glb|gltf|ktx2|hdr|exr)$/i;

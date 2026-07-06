@@ -14,9 +14,11 @@ export interface InteractionSlice {
   setKeyboardTargetId: (keyboardTargetId: InteractiveObjectId | null) => void;
 }
 
-export const createInteractionSlice = (
-  set: (partial: Partial<InteractionSlice>) => void,
-): InteractionSlice => ({
+type InteractionSliceSetter = (
+  partial: Partial<InteractionSlice> | ((state: InteractionSlice) => Partial<InteractionSlice>),
+) => void;
+
+export const createInteractionSlice = (set: InteractionSliceSetter): InteractionSlice => ({
   hoveredObjectId: null,
   pressedObjectId: null,
   pointerType: "unknown",

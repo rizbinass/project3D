@@ -54,6 +54,11 @@ runtime-*.png
 
 # editor and system noise
 .idea/
+.vscode/settings.json
+.vscode/launch.json
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# duplicate assets (real model is in public/assets/models/)
+public/models/

@@ -3,51 +3,34 @@
 import {
   Bloom,
   BrightnessContrast,
-  ChromaticAberration,
-  DepthOfField,
   EffectComposer,
   HueSaturation,
   Vignette,
 } from "@react-three/postprocessing";
-import { useMemo } from "react";
-import { Vector2 } from "three";
 import { qualityProfiles } from "@/lib/three/quality";
 import { useSceneStore } from "@/store/useSceneStore";
 
 export function RoomPostProcessing() {
   const qualityLevel = useSceneStore((state) => state.qualityLevel);
+  const timeMode = useSceneStore((state) => state.timeMode);
   const qualityProfile = qualityProfiles[qualityLevel];
-  const chromaticOffset = useMemo(() => new Vector2(0.00045, 0.00025), []);
-  const cinematicEffectsEnabled = qualityLevel === "ultra";
+  const bloomIntensity = timeMode === "night" ? 0.35 : 0.18;
 
   if (!qualityProfile.postprocessing) {
     return null;
   }
 
   return (
-    <EffectComposer
-      multisampling={qualityLevel === "ultra" ? 2 : 0}
-      enableNormalPass={cinematicEffectsEnabled}
-    >
+    <EffectComposer multisampling={qualityLevel === "ultra" ? 2 : 0}>
       <Bloom
-        intensity={qualityLevel === "ultra" ? 0.32 : 0.24}
-        luminanceThreshold={0.42}
-        luminanceSmoothing={0.82}
+        intensity={bloomIntensity}
+        luminanceThreshold={0.5}
+        luminanceSmoothing={0.9}
         mipmapBlur
       />
-      {cinematicEffectsEnabled ? (
-        <DepthOfField focusDistance={0.032} focalLength={0.025} bokehScale={1.45} />
-      ) : (
-        <></>
-      )}
-      <BrightnessContrast brightness={0.015} contrast={0.055} />
-      <HueSaturation saturation={0.035} />
-      {cinematicEffectsEnabled ? (
-        <ChromaticAberration offset={chromaticOffset} radialModulation modulationOffset={0.15} />
-      ) : (
-        <></>
-      )}
-      <Vignette eskil={false} offset={0.28} darkness={0.42} />
+      <BrightnessContrast brightness={0.01} contrast={0.02} />
+      <HueSaturation saturation={0.015} />
+      <Vignette eskil={false} offset={0.4} darkness={0.18} />
     </EffectComposer>
   );
 }
