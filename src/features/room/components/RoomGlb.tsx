@@ -3,8 +3,11 @@
 import { useGLTF } from "@react-three/drei";
 import { useCallback, useMemo } from "react";
 import { Box3, Color, Light, Mesh, MeshPhysicalMaterial, Vector3, type Object3D } from "three";
+import { useDayNightStore } from "@/store/useDayNightStore";
 
 const GLB_PATH = "/assets/models/room2.glb";
+
+const SWITCH_NAMES = new Set(["switchBoard", "switchHolder", "switchLamp"]);
 
 function isGlass(name: string) {
   const lower = name.toLowerCase();
@@ -68,6 +71,12 @@ export function RoomGLB() {
   const handleClick = useCallback((e: { stopPropagation: () => void; object: Object3D }) => {
     e.stopPropagation();
     const obj = e.object;
+
+    if (SWITCH_NAMES.has(obj.name)) {
+      useDayNightStore.getState().toggle();
+      return;
+    }
+
     const bbox = new Box3().setFromObject(obj);
     const size = bbox.getSize(new Vector3());
     console.log(
