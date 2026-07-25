@@ -1,1 +1,1 @@
-export { PortfolioRoom } from "./components/PortfolioRoom";
+export { RoomScene } from "./components/RoomScene";

@@ -1,7 +1,4 @@
 @import "tailwindcss";
-@import "./tokens.css";
-@import "./theme.css";
-@import "./animations.css";
 
 * {
   box-sizing: border-box;
@@ -9,88 +6,12 @@
 
 html {
   min-height: 100%;
-  background: var(--app-background);
-  color: var(--app-foreground);
-  font-family: var(--font-sans);
-  text-rendering: geometricPrecision;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  background: #080c12;
 }
 
 body {
   min-height: 100%;
   margin: 0;
   overflow-x: hidden;
-  background: var(--app-background);
-  color: var(--app-foreground);
-}
-
-::selection {
-  background: var(--app-selection);
-}
-
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 4px;
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-img,
-svg,
-video,
-canvas {
-  display: block;
-  max-width: 100%;
-}
-
-button {
-  cursor: pointer;
-}
-
-button:disabled,
-[aria-disabled="true"] {
-  cursor: not-allowed;
-}
-
-[data-high-contrast="true"] {
-  --ds-border: currentColor;
-  --shadow-focus: 0 0 0 3px currentColor;
-}
-
-.ds-scrollbar {
-  scrollbar-color: var(--ds-border) transparent;
-  scrollbar-width: thin;
-}
-
-.ds-scrollbar::-webkit-scrollbar {
-  width: 0.625rem;
-  height: 0.625rem;
-}
-
-.ds-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--ds-border);
-  border-radius: var(--radius-full);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
-  }
+  background: #080c12;
 }

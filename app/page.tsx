@@ -1,5 +1,9 @@
-import { PortfolioRoom } from "@/features/room";
+"use client";
+
+import dynamic from "next/dynamic";
+
+const RoomScene = dynamic(() => import("@/features/room").then((m) => m.RoomScene), { ssr: false });
 
 export default function HomePage() {
-  return <PortfolioRoom />;
+  return <RoomScene />;
 }
