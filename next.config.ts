@@ -5,13 +5,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
   productionBrowserSourceMaps: false,
-  images: {
-    formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 31536000,
-    remotePatterns: [],
-  },
   experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion", "gsap", "three", "@react-three/drei"],
+    optimizePackageImports: ["three", "@react-three/drei"],
   },
   webpack: (config) => {
     config.module.rules.push({

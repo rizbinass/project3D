@@ -1,9 +1,0 @@
-{
-  "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "bradlc.vscode-tailwindcss",
-    "unifiedjs.vscode-mdx",
-    "yoavbls.pretty-ts-errors"
-  ]
-}

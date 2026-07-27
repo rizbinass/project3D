@@ -11,68 +11,25 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit",
-    "format": "prettier --check .",
-    "format:write": "prettier --write .",
-    "assets:validate": "node scripts/validate-assets.mjs",
-    "assets:manifest": "node scripts/generate-manifest.mjs",
-    "assets:models": "node scripts/optimize-models.mjs",
-    "assets:textures": "node scripts/compress-textures.mjs",
-    "assets:optimize": "pnpm assets:textures && pnpm assets:models && pnpm assets:manifest",
-    "analyze:bundle": "node scripts/analyze-bundle.mjs",
-    "audit:lighthouse": "lhci autorun",
-    "prepare": "husky"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.4.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
-    "@react-three/postprocessing": "^3.0.4",
-    "clsx": "^2.1.1",
-    "framer-motion": "^12.42.2",
-    "gsap": "^3.12.7",
-    "lenis": "^1.1.20",
-    "leva": "^0.10.1",
-    "lucide-react": "^1.23.0",
     "next": "15.5.20",
-    "postprocessing": "^6.39.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-hook-form": "^7.54.2",
-    "tailwind-merge": "^3.6.0",
     "three": "^0.185.1",
-    "zod": "^3.24.1",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.3",
-    "@gltf-transform/cli": "^4.4.1",
-    "@lhci/cli": "^0.15.1",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.10.7",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "@types/three": "^0.185.0",
-    "eslint": "^9.18.0",
-    "eslint-config-next": "15.5.20",
-    "husky": "^9.1.7",
-    "lint-staged": "^15.3.0",
     "postcss": "^8.5.1",
-    "prettier": "^3.4.2",
-    "prettier-plugin-tailwindcss": "^0.6.10",
-    "sharp": "^0.35.3",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.3"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,css,scss,yml,yaml}": [
-      "prettier --write"
-    ]
   }
 }
