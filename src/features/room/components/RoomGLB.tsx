@@ -1,7 +1,7 @@
 "use client";
 
 import { useGLTF } from "@react-three/drei";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 import { Box3, Color, Light, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Vector3, type Object3D } from "three";
 import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 import { getMaterialForMesh } from "@/config/meshColors";
@@ -20,7 +20,6 @@ function isGlass(name: string) {
 
 export function RoomGLB() {
   const { scene } = useGLTF(GLB_PATH);
-  const lampPosRef = useRef(new Vector3());
   const isNight = useDayNightStore((s) => s.isNight);
 
   function findMaterialIndex(mesh: Mesh, name: string): number {
@@ -46,11 +45,6 @@ export function RoomGLB() {
     cloned.updateMatrixWorld(true);
 
     cloned.traverse((obj) => {
-      if (obj.name === "wallShelfLamp") {
-        obj.getWorldPosition(lampPosRef.current);
-        return;
-      }
-
       if (obj instanceof Light) {
         if (obj.name === "roomLight") {
           (obj as { intensity: number }).intensity = 0;
@@ -176,20 +170,16 @@ export function RoomGLB() {
     );
   }, []);
 
-  const pos = lampPosRef.current;
-
   return (
     <>
       <primitive object={preparedScene} onClick={handleClick} />
-      {pos && (
-        <rectAreaLight
-          args={["#bdab44", 1.2, 0.6, 0.5]}
-          position={[pos.x, pos.y - 0.03, pos.z]}
-          rotation-x={-Math.PI / 2}
-          intensity={isNight ? 1.2 : 0}
-          visible={isNight}
-        />
-      )}
+      <rectAreaLight
+        args={["#bdab44", 1.2, 0.6, 0.5]}
+        position={[1.386, 1.366, 0.862]}
+        rotation-x={-Math.PI / 2}
+        intensity={isNight ? 1.2 : 0}
+        visible={isNight}
+      />
     </>
   );
 }
