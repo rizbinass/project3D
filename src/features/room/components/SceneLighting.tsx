@@ -15,13 +15,13 @@ export function SceneLighting() {
 
     if (ambientRef.current) {
       const current = ambientRef.current.intensity;
-      const target = isNight ? 0 : 0.5;
+      const target = isNight ? 0.05 : 0.5;
       ambientRef.current.intensity = current + (target - current) * t;
     }
 
     if (directionalRef.current) {
       const current = directionalRef.current.intensity;
-      const target = isNight ? 0 : 0.8;
+      const target = isNight ? 0.08 : 0.8;
       directionalRef.current.intensity = current + (target - current) * t;
     }
   });
