@@ -175,7 +175,7 @@ export function RoomGLB() {
       <primitive object={preparedScene} onClick={handleClick} />
       <rectAreaLight
         args={["#bdab44", 1.2, 0.6, 0.5]}
-        position={[1.386, 1.366, 0.862]}
+        position={[1.15, 1.366, 0.862]}
         rotation-x={-Math.PI / 2}
         intensity={isNight ? 1.2 : 0}
         visible={isNight}
