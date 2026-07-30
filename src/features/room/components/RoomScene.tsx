@@ -18,6 +18,7 @@ export function RoomScene() {
           <RoomGLB />
         </Suspense>
         <OrbitControls
+          makeDefault
           enableDamping
           dampingFactor={0.08}
           minDistance={1.5}

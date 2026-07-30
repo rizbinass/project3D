@@ -1,8 +1,9 @@
 "use client";
 
 import { useGLTF } from "@react-three/drei";
-import { useCallback, useMemo } from "react";
-import { Box3, Color, Light, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Vector3, type Object3D } from "three";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useCallback, useMemo, useRef } from "react";
+import { Color, Light, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Vector3, type Object3D } from "three";
 import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 import { getMaterialForMesh } from "@/config/meshColors";
 import { useDayNightStore } from "@/store/useDayNightStore";
@@ -12,6 +13,21 @@ RectAreaLightUniformsLib.init();
 const GLB_PATH = "/assets/models/room2.glb";
 
 const SWITCH_NAMES = new Set(["switchBoard", "switchHolder", "switchLamp"]);
+const LERP_SPEED = 0.08;
+const DIST_THRESHOLD = 0.05;
+
+function hasMaterialName(obj: Object3D, name: string): boolean {
+  if (!(obj instanceof Mesh)) return false;
+  const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+  return mats.some((m) => (m as { name?: string }).name === name);
+}
+
+function isMonitor(obj: Object3D): boolean {
+  const target = obj.name.toLowerCase().includes("monitor") ? obj : obj.parent;
+  if (!target) return false;
+  if (target.name.toLowerCase().includes("monitor")) return true;
+  return hasMaterialName(target, "lcdMonitor");
+}
 
 function isGlass(name: string) {
   const lower = name.toLowerCase();
@@ -21,6 +37,11 @@ function isGlass(name: string) {
 export function RoomGLB() {
   const { scene } = useGLTF(GLB_PATH);
   const isNight = useDayNightStore((s) => s.isNight);
+  const zoomRef = useRef(false);
+  const zoomPos = useRef(new Vector3());
+  const zoomLook = useRef(new Vector3());
+
+  const camera = useThree((s) => s.camera);
 
   function findMaterialIndex(mesh: Mesh, name: string): number {
     const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
@@ -149,8 +170,28 @@ export function RoomGLB() {
     return cloned;
   }, [scene]);
 
+  useFrame((state) => {
+    const { camera, controls } = state;
+    if (!controls || !zoomRef.current) return;
+    const ctrls = controls as unknown as { enabled: boolean; minDistance: number; target: Vector3; update: () => void };
+
+    ctrls.enabled = false;
+    ctrls.minDistance = 0;
+    camera.position.lerp(zoomPos.current, LERP_SPEED);
+    ctrls.target.lerp(zoomLook.current, LERP_SPEED);
+
+    if (camera.position.distanceTo(zoomPos.current) < DIST_THRESHOLD) {
+      camera.position.copy(zoomPos.current);
+      ctrls.target.copy(zoomLook.current);
+      ctrls.enabled = true;
+      ctrls.update();
+      zoomRef.current = false;
+    }
+  });
+
   const handleClick = useCallback((e: { stopPropagation: () => void; object: Object3D }) => {
     e.stopPropagation();
+    console.log("clicked:", e.object.name, "| parent:", e.object.parent?.name);
     const obj = e.object;
 
     if (SWITCH_NAMES.has(obj.name)) {
@@ -158,16 +199,14 @@ export function RoomGLB() {
       return;
     }
 
-    const bbox = new Box3().setFromObject(obj);
-    const size = bbox.getSize(new Vector3());
-    console.log(
-      "Clicked:",
-      obj.name || obj.type,
-      "| BBox:",
-      size.toArray().map((v) => v.toFixed(3)),
-      "| Type:",
-      obj.type,
-    );
+    if (isMonitor(obj)) {
+      const worldPos = new Vector3();
+      obj.getWorldPosition(worldPos);
+      zoomLook.current.copy(worldPos);
+      const dir = new Vector3().subVectors(camera.position, worldPos).normalize();
+      zoomPos.current.copy(worldPos).add(dir.multiplyScalar(0.8));
+      zoomRef.current = true;
+    }
   }, []);
 
   return (
@@ -175,7 +214,7 @@ export function RoomGLB() {
       <primitive object={preparedScene} onClick={handleClick} />
       <rectAreaLight
         args={["#bdab44", 1.2, 0.6, 0.5]}
-        position={[1.15, 1.366, 0.862]}
+        position={[1.15, 1.396, 0.862]}
         rotation-x={-Math.PI / 2}
         intensity={isNight ? 1.2 : 0}
         visible={isNight}
