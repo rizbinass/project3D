@@ -10,7 +10,7 @@ import { Background } from "./Background";
 export function RoomScene() {
   return (
     <div className="h-dvh w-full">
-      <Canvas camera={{ position: [3, 2, 5], fov: 45 }}>
+      <Canvas camera={{ position: [0, 1.6, -4], fov: 45 }}>
         <color attach="background" args={["#87CEEB"]} />
         <Background />
         <SceneLighting />

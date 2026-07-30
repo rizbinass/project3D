@@ -3,7 +3,7 @@
 import { useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useCallback, useMemo, useRef } from "react";
-import { Color, Light, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Vector3, type Object3D } from "three";
+import { Box3, Color, Light, Mesh, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial, Quaternion, Vector3, type Object3D } from "three";
 import { RectAreaLightUniformsLib } from "three/addons/lights/RectAreaLightUniformsLib.js";
 import { getMaterialForMesh } from "@/config/meshColors";
 import { useDayNightStore } from "@/store/useDayNightStore";
@@ -29,6 +29,11 @@ function isMonitor(obj: Object3D): boolean {
   return hasMaterialName(target, "lcdMonitor");
 }
 
+function isPhone(obj: Object3D): boolean {
+  if (obj.name.toLowerCase().startsWith("handphone")) return true;
+  return hasMaterialName(obj, "lcdHp");
+}
+
 function isGlass(name: string) {
   const lower = name.toLowerCase();
   return lower.includes("glass") || lower.includes("kaca") || lower === "windowblank";
@@ -40,6 +45,7 @@ export function RoomGLB() {
   const zoomRef = useRef(false);
   const zoomPos = useRef(new Vector3());
   const zoomLook = useRef(new Vector3());
+  const phoneLcdRef = useRef<Object3D | null>(null);
 
   const camera = useThree((s) => s.camera);
 
@@ -150,9 +156,15 @@ export function RoomGLB() {
         return;
       }
 
-      const lcdIdx = findMaterialIndex(obj, "lcdMonitor");
-      if (lcdIdx !== -1) {
-        replaceMaterialByIndex(obj, lcdIdx, new MeshBasicMaterial({ color: "#ffffff", side: 2 }));
+      if (findMaterialIndex(obj, "lcdHp") !== -1) {
+        phoneLcdRef.current = obj;
+      }
+
+      for (const name of ["lcdMonitor", "lcdHp"]) {
+        const idx = findMaterialIndex(obj, name);
+        if (idx !== -1) {
+          replaceMaterialByIndex(obj, idx, new MeshBasicMaterial({ color: "#ffffff", side: 2 }));
+        }
       }
 
       const colorRule = getMaterialForMesh(obj.name);
@@ -200,11 +212,32 @@ export function RoomGLB() {
     }
 
     if (isMonitor(obj)) {
-      const worldPos = new Vector3();
-      obj.getWorldPosition(worldPos);
-      zoomLook.current.copy(worldPos);
-      const dir = new Vector3().subVectors(camera.position, worldPos).normalize();
-      zoomPos.current.copy(worldPos).add(dir.multiplyScalar(0.8));
+      const center = new Vector3();
+      new Box3().setFromObject(obj).getCenter(center);
+      zoomLook.current.copy(center);
+      const dir = new Vector3().subVectors(camera.position, center).normalize();
+      zoomPos.current.copy(center).add(dir.multiplyScalar(0.8));
+      zoomRef.current = true;
+    }
+
+    if (isPhone(obj)) {
+      const target = phoneLcdRef.current ?? obj;
+      const center = new Vector3();
+      new Box3().setFromObject(target).getCenter(center);
+      zoomLook.current.copy(center);
+      const q = new Quaternion();
+      target.getWorldQuaternion(q);
+      const camDir = new Vector3().subVectors(camera.position, center).normalize();
+      const axes = [new Vector3(1,0,0), new Vector3(-1,0,0), new Vector3(0,1,0), new Vector3(0,-1,0), new Vector3(0,0,1), new Vector3(0,0,-1)];
+      let best = axes[0].clone().applyQuaternion(q);
+      let bestDot = best.dot(camDir);
+      for (let i = 1; i < axes.length; i++) {
+        const d = axes[i].clone().applyQuaternion(q);
+        const dot = d.dot(camDir);
+        if (dot > bestDot) { bestDot = dot; best = d; }
+      }
+      if (bestDot < 0) best.negate();
+      zoomPos.current.copy(center).add(best.multiplyScalar(0.35));
       zoomRef.current = true;
     }
   }, []);
