@@ -46,8 +46,12 @@ export function RoomGLB() {
   const zoomPos = useRef(new Vector3());
   const zoomLook = useRef(new Vector3());
   const phoneLcdRef = useRef<Object3D | null>(null);
+  const monitorLcdRef = useRef<Object3D | null>(null);
 
   const camera = useThree((s) => s.camera);
+  const width = useThree((s) => s.size.width);
+  const widthRef = useRef(width);
+  widthRef.current = width;
 
   function findMaterialIndex(mesh: Mesh, name: string): number {
     const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
@@ -159,6 +163,9 @@ export function RoomGLB() {
       if (findMaterialIndex(obj, "lcdHp") !== -1) {
         phoneLcdRef.current = obj;
       }
+      if (findMaterialIndex(obj, "lcdMonitor") !== -1) {
+        monitorLcdRef.current = obj;
+      }
 
       for (const name of ["lcdMonitor", "lcdHp"]) {
         const idx = findMaterialIndex(obj, name);
@@ -211,34 +218,35 @@ export function RoomGLB() {
       return;
     }
 
-    if (isMonitor(obj)) {
-      const center = new Vector3();
-      new Box3().setFromObject(obj).getCenter(center);
-      zoomLook.current.copy(center);
-      const dir = new Vector3().subVectors(camera.position, center).normalize();
-      zoomPos.current.copy(center).add(dir.multiplyScalar(0.8));
-      zoomRef.current = true;
-    }
-
-    if (isPhone(obj)) {
-      const target = phoneLcdRef.current ?? obj;
-      const center = new Vector3();
-      new Box3().setFromObject(target).getCenter(center);
-      zoomLook.current.copy(center);
-      const q = new Quaternion();
-      target.getWorldQuaternion(q);
-      const camDir = new Vector3().subVectors(camera.position, center).normalize();
-      const axes = [new Vector3(1,0,0), new Vector3(-1,0,0), new Vector3(0,1,0), new Vector3(0,-1,0), new Vector3(0,0,1), new Vector3(0,0,-1)];
-      let best = axes[0].clone().applyQuaternion(q);
-      let bestDot = best.dot(camDir);
-      for (let i = 1; i < axes.length; i++) {
-        const d = axes[i].clone().applyQuaternion(q);
-        const dot = d.dot(camDir);
-        if (dot > bestDot) { bestDot = dot; best = d; }
+    if (isMonitor(obj) || isPhone(obj)) {
+      if (widthRef.current < 768) {
+        const target = phoneLcdRef.current ?? obj;
+        const center = new Vector3();
+        new Box3().setFromObject(target).getCenter(center);
+        zoomLook.current.copy(center);
+        const q = new Quaternion();
+        target.getWorldQuaternion(q);
+        const camDir = new Vector3().subVectors(camera.position, center).normalize();
+        const axes = [new Vector3(1,0,0), new Vector3(-1,0,0), new Vector3(0,1,0), new Vector3(0,-1,0), new Vector3(0,0,1), new Vector3(0,0,-1)];
+        let best = axes[0].clone().applyQuaternion(q);
+        let bestDot = best.dot(camDir);
+        for (let i = 1; i < axes.length; i++) {
+          const d = axes[i].clone().applyQuaternion(q);
+          const dot = d.dot(camDir);
+          if (dot > bestDot) { bestDot = dot; best = d; }
+        }
+        if (bestDot < 0) best.negate();
+        zoomPos.current.copy(center).add(best.multiplyScalar(0.35));
+        zoomRef.current = true;
+      } else {
+        const target = monitorLcdRef.current ?? obj;
+        const center = new Vector3();
+        target.getWorldPosition(center);
+        zoomLook.current.copy(center);
+        const dir = new Vector3().subVectors(camera.position, center).normalize();
+        zoomPos.current.copy(center).add(dir.multiplyScalar(0.8));
+        zoomRef.current = true;
       }
-      if (bestDot < 0) best.negate();
-      zoomPos.current.copy(center).add(best.multiplyScalar(0.35));
-      zoomRef.current = true;
     }
   }, []);
 
@@ -246,7 +254,7 @@ export function RoomGLB() {
     <>
       <primitive object={preparedScene} onClick={handleClick} />
       <rectAreaLight
-        args={["#bdab44", 1.2, 0.6, 0.5]}
+        args={["#bdab44", 1.2, 0.5, 0.5]}
         position={[1.15, 1.396, 0.862]}
         rotation-x={-Math.PI / 2}
         intensity={isNight ? 1.2 : 0}
